@@ -14,6 +14,64 @@ data class Color(val red: Int, val green: Int, val blue: Int) {
 
     val asUInt: UInt
         get() = ((red and 0xFF) shl 16 or ((green and 0xFF) shl 8) or (blue and 0xFF)).toUInt()
+
+    fun adjustBrightness(factor: Double): Color {
+        val normalizedRed = red.toDouble() / 255.0
+        val normalizedGreen = green.toDouble() / 255.0
+        val normalizedBlue = blue.toDouble() / 255.0
+        val maxValue = maxOf(normalizedRed, maxOf(normalizedGreen, normalizedBlue))
+        val minValue = minOf(normalizedRed, minOf(normalizedGreen, normalizedBlue))
+        var lightness = (maxValue + minValue) / 2.0
+        val threshold = 0.5
+        val hue: Double
+        val saturation: Double
+        if (maxValue == minValue) {
+            hue = 0.0
+            saturation = 0.0
+        } else {
+            val difference = maxValue - minValue
+            saturation = if (lightness > threshold) difference / (2.0 - maxValue - minValue) else difference / (maxValue + minValue)
+            var hueValue: Double = when (maxValue) {
+                normalizedRed -> (normalizedGreen - normalizedBlue) / difference + (if (normalizedGreen < normalizedBlue) 6.0 else 0.0)
+                normalizedGreen -> (normalizedBlue - normalizedRed) / difference + 2.0
+                else -> (normalizedRed - normalizedGreen) / difference + 4.0
+            }
+            hueValue /= 6.0
+            hue = hueValue
+        }
+
+        lightness = (lightness * factor).coerceIn(0.0, 1.0)
+        val r: Double
+        val g: Double
+        val b: Double
+        if (saturation == 0.0) {
+            r = lightness
+            g = lightness
+            b = lightness
+        } else {
+            val colorIntensity = if (lightness < threshold) lightness * (1.0 + saturation) else lightness + saturation - lightness * saturation
+            val lightnessScaled = 2.0 * lightness - colorIntensity
+            fun hueToRGB(value: Double): Double {
+                var v = value
+                if (v < 0.0) v += 1.0
+                if (v > 1.0) v -= 1.0
+                return when {
+                    v < 1.0 / 6.0 -> lightnessScaled + (colorIntensity - lightnessScaled) * 6.0 * v
+                    v < 1.0 / 2.0 -> colorIntensity
+                    v < 2.0 / 3.0 -> lightnessScaled + (colorIntensity - lightnessScaled) * (2.0 / 3.0 - v) * 6.0
+                    else -> lightnessScaled
+                }
+            }
+            r = hueToRGB(hue + 1.0 / 3.0)
+            g = hueToRGB(hue)
+            b = hueToRGB(hue - 1.0 / 3.0)
+        }
+        return Color(
+            PyCompat.roundHalfEven(r * 255.0),
+            PyCompat.roundHalfEven(g * 255.0),
+            PyCompat.roundHalfEven(b * 255.0)
+        )
+    }
 }
 
 enum class GradientDirection {

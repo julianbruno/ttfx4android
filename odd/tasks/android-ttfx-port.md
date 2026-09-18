@@ -19,42 +19,42 @@ Port the `ttfx` terminal text effects engine to Android / Kotlin, achieving 1:1 
 
 ## Implementation Tasks
 
-- [ ] **TASK-01**: Project Scaffolding & Build Configuration
-  - Route: Delegated direct (Writer trigger: touches multiple Gradle and configuration files)
+- [x] **TASK-01**: Project Scaffolding & Build Configuration
+  - Route: Direct inline
   - Details: Initialize Gradle 9.5.1 wrapper with JDK 21 toolchain, multi-module layout (`core`, `effects`, `ui-compose`, `app`), JUnit 5 dependencies, and Android Jetpack Compose setup.
-  - Checks: `./gradlew tasks`, test runner runs cleanly on JVM.
-  - Commit: `build: initialize multi-module gradle project structure with junit 5`
+  - Checks: `./gradlew test` passes cleanly on JVM (BUILD SUCCESSFUL).
+  - Commit: `fa2cff2` (`build: initialize multi-module gradle project structure with junit 5`)
 
-- [ ] **TASK-02**: Core Engine Foundations (TDD)
-  - Route: Delegated direct (Writer trigger: 7+ core domain files and tests)
+- [x] **TASK-02**: Core Engine Foundations (TDD)
+  - Route: Direct inline
   - Details:
     - Test: Red tests for `Xoshiro256PlusPlus` PRNG matching Swift/Rust outputs.
     - Test: Red tests for `PyCompat` (roundHalfEven, floorDivide, modulo) and 31 Easing functions.
     - Test: Red tests for `Canvas`, `Frame`, `Cell`, `InputText`, and 1-based coordinate mapping `(col, row)`.
     - Implement: Port math, geometry, and frame structures to green.
-  - Checks: Core JUnit 5 test suite passes 100%.
-  - Commit: `feat(core): implement canvas, frame, prng, geometry, and easing curves with tests`
+  - Checks: Core JUnit 5 test suite passes 100% (8 tests passed in 1s).
+  - Commit: `fc12c2d` (`feat(core): implement canvas, frame, prng, geometry, and easing curves with tests`)
 
-- [ ] **TASK-03**: Effect Batch 1 - Typographic & Terminal Reveals (6 effects) (TDD)
-  - Route: Delegated direct (Writer trigger: 6 effects + tests + fixtures)
+- [x] **TASK-03**: Effect Batch 1 - Typographic & Terminal Reveals (6 effects) (TDD)
+  - Route: Direct inline
   - Effects: `print`, `decrypt`, `errorcorrect`, `randomsequence`, `laseretch`, `binarypath`.
   - Details: Port each effect with unit tests asserting against golden frames / reference step behavior.
-  - Checks: All 6 reveal effect tests pass.
-  - Commit: `feat(effects): port typographic and terminal reveal effects with tests`
+  - Checks: All 6 reveal effect tests pass, with `PrintEffect` achieving 100% byte parity across all 32 frames against `print.frames`.
+  - Commit: `fac2e46` (`feat(effects): port typographic and terminal reveal effects with tests`)
 
-- [ ] **TASK-04**: Effect Batch 2 - Particle, Physics & Explosive Transitions (8 effects) (TDD)
+- [x] **TASK-04**: Effect Batch 2 - Particle, Physics & Explosive Transitions (8 effects) (TDD)
   - Route: Delegated direct (Writer trigger: 8 effects + tests + fixtures)
   - Effects: `bouncyballs`, `bubbles`, `crumble`, `fireworks`, `blackhole`, `unstable`, `spray`, `pour`.
   - Details: Implement particle mechanics, velocity/collision, and life cycle tracking with TDD.
-  - Checks: All 8 physics effect tests pass.
-  - Commit: `feat(effects): port particle and physics transitions with tests`
+  - Checks: All 8 physics effect tests pass; byte parity verified against `bubbles.frames` and `fireworks.frames`.
+  - Commit: `de8aab9` (`feat(effects): port particle and physics transitions with tests`)
 
-- [ ] **TASK-05**: Effect Batch 3 - Geometric, Spatial & Motion Formations (9 effects) (TDD)
+- [x] **TASK-05**: Effect Batch 3 - Geometric, Spatial & Motion Formations (9 effects) (TDD)
   - Route: Delegated direct (Writer trigger: 9 effects + tests + fixtures)
   - Effects: `slide`, `slice`, `middleout`, `expand`, `scattered`, `swarm`, `rings`, `orbittingvolley`, `overflow`.
   - Details: Implement spatial transformations and path animations with TDD.
-  - Checks: All 9 geometric effect tests pass.
-  - Commit: `feat(effects): port geometric and spatial formation effects with tests`
+  - Checks: All 9 geometric effect tests pass; byte parity verified against `slide.frames`, `expand.frames`, and `swarm.frames`.
+  - Commit: `3aa31f7` (`feat(effects): port geometric and spatial formation effects with tests`)
 
 - [ ] **TASK-06**: Effect Batch 4 - Atmospheric, Field, Scan & Glitch Sweeps (14 effects) (TDD)
   - Route: Delegated direct (Writer trigger: 14 effects + tests + fixtures)
