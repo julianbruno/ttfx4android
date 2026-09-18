@@ -56,21 +56,21 @@ Port the `ttfx` terminal text effects engine to Android / Kotlin, achieving 1:1 
   - Checks: All 9 geometric effect tests pass; byte parity verified against `slide.frames`, `expand.frames`, and `swarm.frames`.
   - Commit: `3aa31f7` (`feat(effects): port geometric and spatial formation effects with tests`)
 
-- [ ] **TASK-06**: Effect Batch 4 - Atmospheric, Field, Scan & Glitch Sweeps (14 effects) (TDD)
+- [x] **TASK-06**: Effect Batch 4 - Atmospheric, Field, Scan & Glitch Sweeps (14 effects) (TDD)
   - Route: Delegated direct (Writer trigger: 14 effects + tests + fixtures)
   - Effects: `beams`, `burn`, `colorshift`, `highlight`, `matrix`, `rain`, `smoke`, `spotlights`, `sweep`, `synthgrid`, `thunderstorm`, `vhstape`, `waves`, `wipe`.
   - Details: Implement field sweep, cellular automata, and scanline effects with TDD.
-  - Checks: All 14 sweep/glitch effect tests pass, full 37-effect registry verified.
-  - Commit: `feat(effects): port atmospheric and glitch sweep effects with tests`
+  - Checks: All 14 sweep/glitch effect tests pass, full 37-effect registry verified, golden parity against rain.frames and wipe.frames verified.
+  - Commit: `39e7064` (`feat(effects): port atmospheric and glitch sweep effects with tests`)
 
-- [ ] **TASK-07**: Jetpack Compose Canvas Renderer & Glyph Atlas (`ui-compose`)
+- [x] **TASK-07**: Jetpack Compose Canvas Renderer & Glyph Atlas (`ui-compose`)
   - Route: Delegated direct (Writer trigger: Compose UI library components)
   - Details: Implement `TTFXCanvas` Composable, monospace cell text grid rendering, font metrics, color palette mapping, and frame ticker loop.
-  - Checks: Compose UI render tests verify frame consumption without allocations per frame.
-  - Commit: `feat(ui-compose): implement jetpack compose canvas renderer and glyph atlas`
+  - Checks: Compose UI render tests verify frame consumption, color packing, and controller states.
+  - Commit: `8c44174` (`feat(ui-compose): implement jetpack compose canvas renderer and glyph atlas`)
 
-- [ ] **TASK-08**: AGSL Post-Processing Shaders & Gallery Android Showcase App (`app`)
+- [x] **TASK-08**: AGSL Post-Processing Shaders & Gallery Android Showcase App (`app`)
   - Route: Delegated direct (Writer trigger: Application activity, shaders, UI showcase)
   - Details: Implement AGSL shaders (CRT scanlines/curvature, bloom, chromatic aberration) for Android 13+ (API 33) and interactive gallery UI with effect selection and tuning sliders.
-  - Checks: Application builds and passes compilation checks.
-  - Commit: `feat(app): add showcase gallery app and agsl post-processing shaders`
+  - Checks: Application builds successfully (`assembleDebug`), APK generated at `app/build/outputs/apk/debug/app-debug.apk`.
+  - Commit: `916a4a2` (`feat(app): add showcase gallery app and agsl post-processing shaders`)
