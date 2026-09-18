@@ -22,3 +22,5 @@ dependencyResolutionManagement {
 rootProject.name = "androidttfx"
 include(":core")
 include(":effects")
+include(":ui-compose")
+include(":app")
