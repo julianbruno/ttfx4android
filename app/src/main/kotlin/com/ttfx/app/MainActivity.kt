@@ -8,6 +8,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,11 +17,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -32,14 +35,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +51,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,6 +59,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -92,15 +96,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ShowcaseScreen() {
-    var selectedEffect by remember { mutableStateOf("fireworks") }
-    var inputText by remember { mutableStateOf("ANDROID TTFX") }
-    var shaderMode by remember { mutableStateOf(ShaderEffectMode.CRT_SCANLINES) }
-    var seed by remember { mutableStateOf(42uL) }
+    var selectedEffect by rememberSaveable { mutableStateOf("fireworks") }
+    var inputText by rememberSaveable { mutableStateOf("ANDROID TTFX") }
+    var shaderMode by rememberSaveable { mutableStateOf(ShaderEffectMode.CRT_SCANLINES) }
+    var seed by rememberSaveable { mutableStateOf(42uL) }
 
-    var isSettingsVisible by remember { mutableStateOf(true) }
-    var speedMultiplier by remember { mutableFloatStateOf(1f) }
-    var fontSizeSp by remember { mutableFloatStateOf(14f) }
-    var selectedSpeed by remember { mutableStateOf("1x") }
+    var isSettingsVisible by rememberSaveable { mutableStateOf(false) }
+    var speedMultiplier by rememberSaveable { mutableFloatStateOf(1f) }
+    var fontSizeSp by rememberSaveable { mutableFloatStateOf(14f) }
+    var selectedSpeed by rememberSaveable { mutableStateOf("1x") }
 
     val speedOptions = remember {
         listOf("0.5x" to 0.5f, "1x" to 1.0f, "1.5x" to 1.5f, "2x" to 2.0f, "3x" to 3.0f)
@@ -137,10 +141,7 @@ fun ShowcaseScreen() {
             .fillMaxSize()
             .padding(14.dp)
     ) {
-        // Automatically hide settings panel if viewport height is too constrained (< 450dp)
-        val hasAdequateHeight = maxHeight >= 480.dp
-        val showSettings = isSettingsVisible && hasAdequateHeight
-
+        val totalHeight = maxHeight
         Column(modifier = Modifier.fillMaxSize()) {
             // App Header & Top Bar
             Row(
@@ -168,9 +169,9 @@ fun ShowcaseScreen() {
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    // Frame status badge
+                    // Frame status badge (fixed one line, enough room for digits)
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp))
@@ -188,19 +189,20 @@ fun ShowcaseScreen() {
                         )
                     }
 
-                    // Settings Visibility Toggle Button
+                    // Settings Visibility Toggle Button (Minimum 44dp touch target for accessibility)
                     IconButton(
                         onClick = { isSettingsVisible = !isSettingsVisible },
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(44.dp)
                             .clip(CircleShape)
-                            .background(if (showSettings) Color(0xFF00FFCC).copy(alpha = 0.2f) else Color(0xFF161928))
+                            .background(if (isSettingsVisible) Color(0xFF00FFCC).copy(alpha = 0.2f) else Color(0xFF161928))
+                            .border(1.dp, if (isSettingsVisible) Color(0xFF00FFCC) else Color(0xFF252A42), CircleShape)
                     ) {
                         Icon(
-                            imageVector = if (showSettings) Icons.Default.Close else Icons.Default.Tune,
-                            contentDescription = if (showSettings) "Hide Controls" else "Show Controls",
-                            tint = if (showSettings) Color(0xFF00FFCC) else Color.LightGray,
-                            modifier = Modifier.size(18.dp)
+                            imageVector = if (isSettingsVisible) Icons.Default.Close else Icons.Default.Tune,
+                            contentDescription = if (isSettingsVisible) "Hide Controls" else "Show Controls",
+                            tint = if (isSettingsVisible) Color(0xFF00FFCC) else Color.LightGray,
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
@@ -208,10 +210,11 @@ fun ShowcaseScreen() {
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Main Terminal Display Box (expands dynamically when settings are hidden)
+            // Main Terminal Display Box (occupies flexible space, guaranteed minimum height)
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(min = 160.dp)
                     .weight(1f)
                     .clip(RoundedCornerShape(8.dp)),
                 colors = CardDefaults.cardColors(containerColor = Color.Black),
@@ -231,28 +234,177 @@ fun ShowcaseScreen() {
                 }
             }
 
-            // Collapsible Controls Panel (Animated in and out)
+            // Quick Status Bottom Bar when settings are collapsed
             AnimatedVisibility(
-                visible = showSettings,
+                visible = !isSettingsVisible,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Active Effect Pill (Clicking opens controls)
+                    Surface(
+                        color = Color(0xFF141726),
+                        shape = RoundedCornerShape(6.dp),
+                        border = BorderStroke(1.dp, Color(0xFF252A42)),
+                        modifier = Modifier.clickable { isSettingsVisible = true }
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text("✨", fontSize = 11.sp)
+                            Text(
+                                text = selectedEffect.uppercase(),
+                                color = Color(0xFF00FFCC),
+                                fontSize = 11.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = "• ${fontSizeSp.toInt()}SP",
+                                color = Color.Gray,
+                                fontSize = 10.sp,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        // Quick Replay
+                        FilledTonalButton(
+                            onClick = { controller.reset() },
+                            colors = ButtonDefaults.filledTonalButtonColors(
+                                containerColor = Color(0xFF161928),
+                                contentColor = Color(0xFF00FFCC)
+                            ),
+                            shape = RoundedCornerShape(6.dp),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = "Replay",
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "REPLAY",
+                                fontSize = 11.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        // Open Controls Button
+                        Button(
+                            onClick = { isSettingsVisible = true },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color(0xFF00FFCC),
+                                contentColor = Color.Black
+                            ),
+                            shape = RoundedCornerShape(6.dp),
+                            contentPadding = PaddingValues(horizontal = 10.dp, vertical = 6.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Tune,
+                                contentDescription = "Controls",
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "SETTINGS",
+                                fontSize = 11.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Collapsible Controls Panel (Scrollable, bounded height so canvas is always visible)
+            AnimatedVisibility(
+                visible = isSettingsVisible,
                 enter = expandVertically() + fadeIn(),
                 exit = shrinkVertically() + fadeOut()
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .heightIn(max = (totalHeight * 0.62f).coerceAtLeast(200.dp))
                         .padding(top = 10.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color(0xFF141726))
+                        .border(1.dp, Color(0xFF252A42), RoundedCornerShape(8.dp))
+                        .verticalScroll(rememberScrollState())
+                        .padding(10.dp)
                 ) {
-                    // Font Size & Speed Panel
-                    Card(
+                    // Header with title and explicit Close/Hide button
+                    Row(
                         modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(containerColor = Color(0xFF141726)),
-                        shape = RoundedCornerShape(8.dp)
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 10.dp, vertical = 8.dp)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
+                            Icon(
+                                imageVector = Icons.Default.Tune,
+                                contentDescription = null,
+                                tint = Color(0xFF00FFCC),
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Text(
+                                text = "CONTROLS & SETTINGS",
+                                color = Color.White,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+
+                        TextButton(
+                            onClick = { isSettingsVisible = false },
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Hide",
+                                tint = Color.LightGray,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Spacer(modifier = Modifier.width(3.dp))
+                            Text(
+                                text = "HIDE",
+                                color = Color.LightGray,
+                                fontSize = 10.sp,
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Speed & Font Size Box
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(Color(0xFF1A1E30))
+                            .padding(horizontal = 8.dp, vertical = 6.dp)
+                    ) {
+                        Column(modifier = Modifier.fillMaxWidth()) {
                             // Top Line: Speed selector & Font Badge
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -275,12 +427,12 @@ fun ShowcaseScreen() {
                                         Box(
                                             modifier = Modifier
                                                 .clip(RoundedCornerShape(4.dp))
-                                                .background(if (isSpeedSelected) Color(0xFF00E5FF) else Color(0xFF20253B))
+                                                .background(if (isSpeedSelected) Color(0xFF00E5FF) else Color(0xFF252A42))
                                                 .clickable {
                                                     selectedSpeed = label
                                                     speedMultiplier = mult
                                                 }
-                                                .padding(horizontal = 7.dp, vertical = 4.dp),
+                                                .padding(horizontal = 7.dp, vertical = 3.dp),
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
@@ -298,19 +450,19 @@ fun ShowcaseScreen() {
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(4.dp))
                                         .background(Color(0xFF00FFCC).copy(alpha = 0.15f))
-                                        .padding(horizontal = 8.dp, vertical = 3.dp)
+                                        .padding(horizontal = 7.dp, vertical = 3.dp)
                                 ) {
                                     Text(
                                         text = "FONT: ${fontSizeSp.toInt()} SP",
                                         color = Color(0xFF00FFCC),
-                                        fontSize = 11.sp,
+                                        fontSize = 10.sp,
                                         fontWeight = FontWeight.Bold,
                                         fontFamily = FontFamily.Monospace
                                     )
                                 }
                             }
 
-                            Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(4.dp))
 
                             // Font slider (8sp - 120sp)
                             Slider(
@@ -322,7 +474,9 @@ fun ShowcaseScreen() {
                                     activeTrackColor = Color(0xFF00FFCC),
                                     inactiveTrackColor = Color(0xFF2A2E43)
                                 ),
-                                modifier = Modifier.fillMaxWidth().height(22.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(22.dp)
                             )
 
                             Spacer(modifier = Modifier.height(4.dp))
@@ -330,7 +484,7 @@ fun ShowcaseScreen() {
                             // Preset chips
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
@@ -345,10 +499,10 @@ fun ShowcaseScreen() {
                                         modifier = Modifier
                                             .weight(1f)
                                             .clip(RoundedCornerShape(3.dp))
-                                            .background(if (isPresetActive) Color(0xFF00FFCC) else Color(0xFF20253B))
+                                            .background(if (isPresetActive) Color(0xFF00FFCC) else Color(0xFF252A42))
                                             .clickable { fontSizeSp = preset }
                                             .padding(vertical = 3.dp),
-                                            contentAlignment = Alignment.Center
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         Text(
                                             text = "${preset.toInt()}",
@@ -363,19 +517,19 @@ fun ShowcaseScreen() {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     // Effect Selector Chips
                     Text(
                         text = "SELECT EFFECT (${EffectRegistry.allEffects.size}):",
                         color = Color.LightGray,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(3.dp))
                     LazyRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
                         items(EffectRegistry.allEffects) { effectName ->
                             val isSelected = effectName == selectedEffect
@@ -384,7 +538,7 @@ fun ShowcaseScreen() {
                                     .clip(RoundedCornerShape(4.dp))
                                     .background(if (isSelected) Color(0xFF00FFCC) else Color(0xFF1A1E30))
                                     .clickable { selectedEffect = effectName }
-                                    .padding(horizontal = 9.dp, vertical = 5.dp)
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Text(
                                     text = effectName,
@@ -397,21 +551,21 @@ fun ShowcaseScreen() {
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     // AGSL Shader Selector
                     Text(
                         text = "AGSL POST-PROCESSING:",
                         color = Color.LightGray,
-                        fontSize = 11.sp,
+                        fontSize = 10.sp,
                         fontFamily = FontFamily.Monospace
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(3.dp))
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .horizontalScroll(rememberScrollState()),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
                         ShaderEffectMode.entries.forEach { mode ->
                             val isSelected = mode == shaderMode
@@ -420,19 +574,19 @@ fun ShowcaseScreen() {
                                     .clip(RoundedCornerShape(4.dp))
                                     .background(if (isSelected) Color(0xFFFF007F) else Color(0xFF1A1E30))
                                     .clickable { shaderMode = mode }
-                                    .padding(horizontal = 9.dp, vertical = 5.dp)
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Text(
                                     text = mode.name,
                                     color = if (isSelected) Color.White else Color.LightGray,
-                                    fontSize = 11.sp,
+                                    fontSize = 10.sp,
                                     fontFamily = FontFamily.Monospace
                                 )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(6.dp))
 
                     // Input Text & Replay Action
                     Row(
@@ -444,7 +598,7 @@ fun ShowcaseScreen() {
                             value = inputText,
                             onValueChange = { inputText = it },
                             modifier = Modifier.weight(1f),
-                            label = { Text("Display Text", fontSize = 11.sp) },
+                            label = { Text("Display Text", fontSize = 10.sp) },
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedTextColor = Color.White,
@@ -457,9 +611,10 @@ fun ShowcaseScreen() {
                         Button(
                             onClick = { controller.reset() },
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00FFCC)),
-                            shape = RoundedCornerShape(6.dp)
+                            shape = RoundedCornerShape(6.dp),
+                            contentPadding = PaddingValues(horizontal = 14.dp, vertical = 10.dp)
                         ) {
-                            Text("Replay", color = Color.Black, fontWeight = FontWeight.Bold)
+                            Text("Replay", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 12.sp)
                         }
                     }
                 }
