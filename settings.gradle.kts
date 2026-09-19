@@ -22,7 +22,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "androidttfx"
+rootProject.name = "ttfx4android"
 include(":core")
 include(":effects")
 include(":ui-compose")
