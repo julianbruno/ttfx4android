@@ -82,6 +82,13 @@ fun ShowcaseScreen() {
     var fps by remember { mutableFloatStateOf(30f) }
     var seed by remember { mutableStateOf(42uL) }
 
+    var speedMultiplier by remember { mutableFloatStateOf(1f) }
+    var fontSizeSp by remember { mutableFloatStateOf(13f) }
+    var selectedSpeed by remember { mutableStateOf("1x") }
+
+    val speedOptions = listOf("0.5x" to 0.5f, "1x" to 1.0f, "1.5x" to 1.5f, "2x" to 2.0f, "3x" to 3.0f)
+    val effectiveFps = (fps * speedMultiplier).toInt().coerceAtLeast(1)
+
     val columns = 40
     val rows = 15
 
@@ -100,7 +107,7 @@ fun ShowcaseScreen() {
     var time by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(Unit) {
         while (true) {
-            time += 0.033f
+            time += 0.033f * speedMultiplier
             delay(33L)
         }
     }
@@ -143,7 +150,7 @@ fun ShowcaseScreen() {
             )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         // Main Display Box with TTFXCanvas + AGSL Shader Modifier
         Card(
@@ -161,13 +168,83 @@ fun ShowcaseScreen() {
                 TTFXCanvas(
                     controller = controller,
                     modifier = Modifier.fillMaxSize(),
-                    fps = fps.toInt(),
-                    fontSizeSp = 13f
+                    fps = effectiveFps,
+                    fontSizeSp = fontSizeSp
                 )
             }
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Font Size & Speed Controls Row
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Speed options
+            Column(modifier = Modifier.weight(1.1f)) {
+                Text(
+                    text = "SPEED: $selectedSpeed",
+                    color = Color.LightGray,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+                Spacer(modifier = Modifier.height(3.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    speedOptions.forEach { (label, mult) ->
+                        val isSpeedSelected = label == selectedSpeed
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(4.dp))
+                                .background(if (isSpeedSelected) Color(0xFF00E5FF) else Color(0xFF1E2235))
+                                .clickable {
+                                    selectedSpeed = label
+                                    speedMultiplier = mult
+                                }
+                                .padding(vertical = 5.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                color = if (isSpeedSelected) Color.Black else Color.White,
+                                fontSize = 10.sp,
+                                fontWeight = if (isSpeedSelected) FontWeight.Bold else FontWeight.Normal,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Font Size Slider
+            Column(modifier = Modifier.weight(0.9f)) {
+                Text(
+                    text = "FONT: ${fontSizeSp.toInt()} SP",
+                    color = Color.LightGray,
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace
+                )
+                Slider(
+                    value = fontSizeSp,
+                    onValueChange = { fontSizeSp = it },
+                    valueRange = 8f..24f,
+                    steps = 15,
+                    colors = SliderDefaults.colors(
+                        thumbColor = Color(0xFF00FFCC),
+                        activeTrackColor = Color(0xFF00FFCC),
+                        inactiveTrackColor = Color(0xFF2A2E43)
+                    ),
+                    modifier = Modifier.height(26.dp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Effect Selector (Scrollable horizontally)
         Text(
@@ -201,7 +278,7 @@ fun ShowcaseScreen() {
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // AGSL Shader Selector
         Text(
@@ -236,7 +313,7 @@ fun ShowcaseScreen() {
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Input Text & Action Buttons
         Row(
