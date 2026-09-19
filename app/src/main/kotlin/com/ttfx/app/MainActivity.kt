@@ -4,10 +4,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -83,17 +86,26 @@ import kotlinx.coroutines.delay
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
                 Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .statusBarsPadding()
-                        .navigationBarsPadding(),
+                    modifier = Modifier.fillMaxSize(),
                     color = Color(0xFF0C0E17)
                 ) {
-                    ShowcaseScreen()
+                    var isSplashVisible by rememberSaveable { mutableStateOf(true) }
+                    Crossfade(
+                        targetState = isSplashVisible,
+                        animationSpec = tween(400),
+                        label = "SplashCrossfade"
+                    ) { showSplash ->
+                        if (showSplash) {
+                            SplashScreen(onDismiss = { isSplashVisible = false })
+                        } else {
+                            ShowcaseScreen()
+                        }
+                    }
                 }
             }
         }
@@ -145,7 +157,9 @@ fun ShowcaseScreen() {
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
-            .padding(14.dp)
+            .statusBarsPadding()
+            .navigationBarsPadding()
+            .padding(horizontal = 14.dp, vertical = 8.dp)
     ) {
         val totalHeight = maxHeight
         Column(modifier = Modifier.fillMaxSize()) {
