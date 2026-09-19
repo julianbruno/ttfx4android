@@ -126,27 +126,34 @@ fun ShowcaseScreen() {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f, fill = false)) {
                 Text(
                     text = "TTFX ANDROID",
                     color = Color(0xFF00FFCC),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Monospace
+                    fontFamily = FontFamily.Monospace,
+                    maxLines = 1
                 )
                 Text(
-                    text = "37 Terminal Text Effects • Compose & AGSL",
+                    text = "37 Terminal Effects • Compose & AGSL",
                     color = Color.Gray,
-                    fontSize = 12.sp,
-                    fontFamily = FontFamily.Monospace
+                    fontSize = 11.sp,
+                    fontFamily = FontFamily.Monospace,
+                    maxLines = 1
                 )
             }
 
+            Spacer(modifier = Modifier.width(8.dp))
+
             Text(
-                text = "Frame: $frameCount [${tickStatus.name}]",
+                text = "F: %4d [%s]".format(frameCount, tickStatus.name.uppercase()),
                 color = if (tickStatus.name == "Complete") Color(0xFF00FF66) else Color(0xFFFFCC00),
                 fontSize = 12.sp,
-                fontFamily = FontFamily.Monospace
+                fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.SemiBold,
+                maxLines = 1,
+                softWrap = false
             )
         }
 
