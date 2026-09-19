@@ -44,6 +44,32 @@ Both repositories share the same creative DNA—originally inspired by Chris R. 
 
 ---
 
+## Visual Parity: Android (Compose + AGSL) vs. Original Swift (Metal)
+
+Below is a side-by-side comparison of the animation engine running on **Android** (Jetpack Compose with hardware-accelerated AGSL CRT scanline shader) alongside the original **Swift (Apple Metal)** reference from [`julianbruno/ttfx`](https://github.com/julianbruno/ttfx):
+
+### 1. `fireworks` Effect
+
+| Android (Jetpack Compose + AGSL) | Original Swift (Apple Metal) |
+| :---: | :---: |
+| <img src="docs/media/android_fireworks.gif" alt="Android Fireworks Effect" width="340" /> | <img src="https://raw.githubusercontent.com/julianbruno/ttfx/main/docs/effects/fireworks.gif" alt="Swift Metal Fireworks" width="340" /> |
+| **`ttfx4android`**: Compose Canvas + AGSL CRT Shader | **`ttfx`**: Metal Compute/Fragment Shaders |
+| [Download Android MP4](docs/media/android_fireworks.mp4) | [Download Swift MP4](https://raw.githubusercontent.com/julianbruno/ttfx/main/docs/swift-port/comparisons/fireworks.mp4) |
+
+### 2. Boot Splash Sequence (`decrypt` Effect)
+
+The Android application showcases an animated boot sequence powered by the `decrypt` effect:
+
+| Android Boot Splash Sequence (`decrypt`) | Original Swift Reference (`decrypt`) |
+| :---: | :---: |
+| <img src="docs/media/android_decrypt.gif" alt="Android Decrypt Splash" width="340" /> | <img src="https://raw.githubusercontent.com/julianbruno/ttfx/main/docs/effects/decrypt.gif" alt="Swift Metal Decrypt" width="340" /> |
+| Native Compose `SplashScreen` with CRT Glow | Metal Shading Reference |
+| [Download Android MP4](docs/media/android_splash.mp4) | [Download Swift MP4](https://raw.githubusercontent.com/julianbruno/ttfx/main/docs/swift-port/comparisons/decrypt.mp4) |
+
+*For visual previews and video comparisons across all 37 effects, see the [**Complete Effects Catalog**](docs/EFFECTS.md).*
+
+---
+
 ## Key Features
 
 - **🚀 Complete 37-Effect Library**: Full catalog of typographic, particle, geometric, and atmospheric effects (see [Effects Catalog](docs/EFFECTS.md)).
