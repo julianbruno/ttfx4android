@@ -24,8 +24,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -67,6 +69,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ttfx.app.shaders.ShaderEffectMode
@@ -84,7 +87,10 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .statusBarsPadding()
+                        .navigationBarsPadding(),
                     color = Color(0xFF0C0E17)
                 ) {
                     ShowcaseScreen()
@@ -143,68 +149,72 @@ fun ShowcaseScreen() {
     ) {
         val totalHeight = maxHeight
         Column(modifier = Modifier.fillMaxSize()) {
-            // App Header & Top Bar
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            // App Header & Top Bar with centered title
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Column(modifier = Modifier.weight(1f, fill = false)) {
+                // Frame status badge (Left / Start)
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(Color(0xFF161928))
+                        .border(1.dp, Color(0xFF252A42), RoundedCornerShape(4.dp))
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
                     Text(
-                        text = "TTFX ANDROID",
-                        color = Color(0xFF00FFCC),
-                        fontSize = 19.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.Monospace,
-                        maxLines = 1
-                    )
-                    Text(
-                        text = "37 Terminal Effects • AGSL",
-                        color = Color.Gray,
+                        text = "F: %4d [%s]".format(frameCount, tickStatus.name.uppercase()),
+                        color = if (tickStatus.name == "Complete") Color(0xFF00FF66) else Color(0xFFFFCC00),
                         fontSize = 11.sp,
                         fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.SemiBold,
                         maxLines = 1
                     )
                 }
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                // Centered App Title
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Frame status badge (fixed one line, enough room for digits)
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(Color(0xFF161928))
-                            .border(1.dp, Color(0xFF252A42), RoundedCornerShape(4.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "F: %4d [%s]".format(frameCount, tickStatus.name.uppercase()),
-                            color = if (tickStatus.name == "Complete") Color(0xFF00FF66) else Color(0xFFFFCC00),
-                            fontSize = 11.sp,
-                            fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.SemiBold,
-                            maxLines = 1
-                        )
-                    }
+                    Text(
+                        text = "TTFX ANDROID",
+                        color = Color(0xFF00FFCC),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = FontFamily.Monospace,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "37 Terminal Effects • AGSL",
+                        color = Color.Gray,
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily.Monospace,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center
+                    )
+                }
 
-                    // Settings Visibility Toggle Button (Minimum 44dp touch target for accessibility)
-                    IconButton(
-                        onClick = { isSettingsVisible = !isSettingsVisible },
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(if (isSettingsVisible) Color(0xFF00FFCC).copy(alpha = 0.2f) else Color(0xFF161928))
-                            .border(1.dp, if (isSettingsVisible) Color(0xFF00FFCC) else Color(0xFF252A42), CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = if (isSettingsVisible) Icons.Default.Close else Icons.Default.Tune,
-                            contentDescription = if (isSettingsVisible) "Hide Controls" else "Show Controls",
-                            tint = if (isSettingsVisible) Color(0xFF00FFCC) else Color.LightGray,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                // Settings Visibility Toggle Button (Right / End)
+                IconButton(
+                    onClick = { isSettingsVisible = !isSettingsVisible },
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .size(44.dp)
+                        .clip(CircleShape)
+                        .background(if (isSettingsVisible) Color(0xFF00FFCC).copy(alpha = 0.2f) else Color(0xFF161928))
+                        .border(1.dp, if (isSettingsVisible) Color(0xFF00FFCC) else Color(0xFF252A42), CircleShape)
+                ) {
+                    Icon(
+                        imageVector = if (isSettingsVisible) Icons.Default.Close else Icons.Default.Tune,
+                        contentDescription = if (isSettingsVisible) "Hide Controls" else "Show Controls",
+                        tint = if (isSettingsVisible) Color(0xFF00FFCC) else Color.LightGray,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
 
