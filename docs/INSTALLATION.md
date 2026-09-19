@@ -67,11 +67,92 @@ adb shell am start -n com.ttfx.app/.MainActivity
 
 ---
 
-## Integrating TTFX in Your Own Android App
+---
 
-### Gradle Module Setup
+## Using TTFX as a Library in Other Projects
 
-If using `ttfx4android` as a submodule or local library in your project:
+`ttfx4android` is structured as a modular library and publishes with full Maven metadata and sources JARs.
+
+### Option A: Via JitPack (Recommended for Remote Projects)
+
+1. Add the JitPack repository to your root `settings.gradle.kts` (inside `dependencyResolutionManagement`):
+```kotlin
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+```
+
+2. Add the dependency in your application module's `build.gradle.kts`:
+```kotlin
+dependencies {
+    // 1. Android Jetpack Compose UI Renderer (automatically includes :core and :effects via api dependency)
+    implementation("com.github.julianbruno.ttfx4android:ui-compose:1.0.0")
+
+    // Or if you only need the pure Kotlin JVM engine (Zero Android SDK dependencies):
+    // implementation("com.github.julianbruno.ttfx4android:effects:1.0.0")
+    // implementation("com.github.julianbruno.ttfx4android:core:1.0.0")
+}
+```
+
+---
+
+### Option B: Via Maven Local (`mavenLocal()`)
+
+You can publish the artifacts locally on your workstation for offline development or local multi-project setups:
+
+1. Inside the `ttfx4android` directory, run:
+```bash
+./gradlew publishToMavenLocal
+```
+
+This compiles, packages AARs/JARs with sources, and installs them into `~/.m2/repository/com/github/julianbruno/ttfx4android/`.
+
+2. In your target Android project, enable `mavenLocal()` in `settings.gradle.kts`:
+```kotlin
+dependencyResolutionManagement {
+    repositories {
+        mavenLocal()
+        google()
+        mavenCentral()
+    }
+}
+```
+
+3. Add the dependency:
+```kotlin
+dependencies {
+    implementation("com.github.julianbruno.ttfx4android:ui-compose:1.0.0")
+}
+```
+
+---
+
+### Option C: Via Composite Build (`includeBuild`)
+
+For local multi-repo development without installing to Maven Local:
+
+In your target project's `settings.gradle.kts`:
+```kotlin
+includeBuild("../ttfx4android")
+```
+
+In your app `build.gradle.kts`:
+```kotlin
+dependencies {
+    implementation("com.github.julianbruno.ttfx4android:ui-compose")
+}
+```
+
+---
+
+### Option D: Local Submodules
+
+If using `ttfx4android` as a submodule:
 
 In `settings.gradle.kts`:
 ```kotlin
@@ -87,11 +168,9 @@ project(":ui-compose").projectDir = file("path/to/ttfx4android/ui-compose")
 In your app module's `build.gradle.kts`:
 ```kotlin
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":effects"))
-    implementation(project(":ui-compose"))
+    implementation(project(":ui-compose")) // Transitive api dependencies automatically pull in :core and :effects
 
-    // Jetpack Compose
+    // Compose BOM
     val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
     implementation(composeBom)
     implementation("androidx.compose.ui:ui")

@@ -117,6 +117,29 @@ ttfx4android/
 
 ## Quick Start in Jetpack Compose
 
+### 1. Add Dependency (JitPack)
+In your root `settings.gradle.kts`:
+```kotlin
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+```
+
+In your module's `build.gradle.kts`:
+```kotlin
+dependencies {
+    // Complete Compose UI + Effects + Core
+    implementation("com.github.julianbruno.ttfx4android:ui-compose:1.0.0")
+}
+```
+
+*(You can also publish locally with `./gradlew publishToMavenLocal`. See [Installation Guide](docs/INSTALLATION.md)).*
+
+### 2. Render Animation in Compose
 ```kotlin
 val effectName = "fireworks"
 val text = "HELLO WORLD"

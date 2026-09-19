@@ -2,6 +2,7 @@ plugins {
     id("com.android.library")
     kotlin("android")
     id("org.jetbrains.kotlin.plugin.compose")
+    `maven-publish`
 }
 
 android {
@@ -34,11 +35,17 @@ android {
     buildFeatures {
         compose = true
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
 }
 
 dependencies {
-    implementation(project(":core"))
-    implementation(project(":effects"))
+    api(project(":core"))
+    api(project(":effects"))
 
     val composeBom = platform("androidx.compose:compose-bom:2024.12.01")
     implementation(composeBom)
@@ -52,4 +59,15 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation(project(":core"))
     testImplementation(project(":effects"))
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("release") {
+                from(components["release"])
+                artifactId = "ui-compose"
+            }
+        }
+    }
 }
