@@ -116,8 +116,8 @@ class MainActivity : ComponentActivity() {
 fun ShowcaseScreen() {
     var selectedEffect by rememberSaveable { mutableStateOf("fireworks") }
     var inputText by rememberSaveable { mutableStateOf("ANDROID TTFX") }
-    var shaderMode by rememberSaveable { mutableStateOf(ShaderEffectMode.CRT_SCANLINES) }
-    var seed by rememberSaveable { mutableStateOf(42uL) }
+    var shaderMode by remember { mutableStateOf(ShaderEffectMode.CRT_SCANLINES) }
+    var seed by remember { mutableStateOf(42uL) }
 
     var isSettingsVisible by rememberSaveable { mutableStateOf(false) }
     var speedMultiplier by rememberSaveable { mutableFloatStateOf(1f) }
