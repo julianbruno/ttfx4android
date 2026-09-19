@@ -96,27 +96,32 @@ fun TTFXCanvas(
             val canvasWidthPx = size.width
             val canvasHeightPx = size.height
 
-            // Calculate grid scale
+            // Calculate grid scale only if fitViewport is enabled
             val scale = if (fitViewport) {
                 val scaleX = if (widthCells > 0 && charWidth > 0f) canvasWidthPx / (widthCells * charWidth) else 1f
                 val scaleY = if (heightCells > 0 && charHeight > 0f) canvasHeightPx / (heightCells * charHeight) else 1f
-                minOf(scaleX, scaleY).coerceAtLeast(0.1f)
+                minOf(scaleX, scaleY).coerceAtLeast(0.05f)
             } else {
                 1f
             }
 
-            val effectiveCharWidth = charWidth * scale
-            val effectiveCharHeight = charHeight * scale
+            val actualTextSizePx = (fontSizeSp * density.density) * scale
+            textPaint.textSize = actualTextSizePx
 
-            val offsetX = ((canvasWidthPx - widthCells * effectiveCharWidth) / 2f)
-            val offsetY = ((canvasHeightPx - heightCells * effectiveCharHeight) / 2f)
+            // Recompute exact character metrics for the current font size
+            val currentMetrics = textPaint.fontMetrics
+            val effectiveCharWidth = textPaint.measureText("M")
+            val effectiveCharHeight = currentMetrics.descent - currentMetrics.ascent
+            val currentBaselineOffset = -currentMetrics.ascent
+
+            // Center the grid in the viewport
+            val offsetX = (canvasWidthPx - widthCells * effectiveCharWidth) / 2f
+            val offsetY = (canvasHeightPx - heightCells * effectiveCharHeight) / 2f
 
             val nativeCanvas = drawContext.canvas.nativeCanvas
 
             drawContext.canvas.save()
             drawContext.canvas.translate(offsetX, offsetY)
-
-            textPaint.textSize = (fontSizeSp * density.density) * scale
 
             for (y in 0 until heightCells) {
                 val rowY = y * effectiveCharHeight
@@ -146,7 +151,7 @@ fun TTFXCanvas(
                         nativeCanvas.drawText(
                             charStr,
                             colX,
-                            rowY + (textBaselineOffset * scale),
+                            rowY + currentBaselineOffset,
                             textPaint
                         )
                     }
