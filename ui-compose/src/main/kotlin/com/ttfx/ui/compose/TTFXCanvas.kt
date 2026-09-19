@@ -49,6 +49,7 @@ fun TTFXCanvas(
     fps: Int = 30,
     backgroundColor: ComposeColor = ComposeColor.Black,
     fontSizeSp: Float = 14f,
+    fitViewport: Boolean = false,
     autoPlay: Boolean = true
 ) {
     val tickStatus by controller.tickStatus.collectAsState()
@@ -67,7 +68,7 @@ fun TTFXCanvas(
     }
 
     val density = LocalDensity.current
-    val textPaint = remember(fontSizeSp) {
+    val textPaint = remember(fontSizeSp, density) {
         Paint().apply {
             isAntiAlias = true
             typeface = Typeface.MONOSPACE
@@ -95,16 +96,20 @@ fun TTFXCanvas(
             val canvasWidthPx = size.width
             val canvasHeightPx = size.height
 
-            // Calculate grid scale to fit terminal within viewport
-            val scaleX = if (widthCells > 0 && charWidth > 0f) canvasWidthPx / (widthCells * charWidth) else 1f
-            val scaleY = if (heightCells > 0 && charHeight > 0f) canvasHeightPx / (heightCells * charHeight) else 1f
-            val scale = minOf(scaleX, scaleY).coerceAtLeast(0.1f)
+            // Calculate grid scale
+            val scale = if (fitViewport) {
+                val scaleX = if (widthCells > 0 && charWidth > 0f) canvasWidthPx / (widthCells * charWidth) else 1f
+                val scaleY = if (heightCells > 0 && charHeight > 0f) canvasHeightPx / (heightCells * charHeight) else 1f
+                minOf(scaleX, scaleY).coerceAtLeast(0.1f)
+            } else {
+                1f
+            }
 
             val effectiveCharWidth = charWidth * scale
             val effectiveCharHeight = charHeight * scale
 
-            val offsetX = ((canvasWidthPx - widthCells * effectiveCharWidth) / 2f).coerceAtLeast(0f)
-            val offsetY = ((canvasHeightPx - heightCells * effectiveCharHeight) / 2f).coerceAtLeast(0f)
+            val offsetX = ((canvasWidthPx - widthCells * effectiveCharWidth) / 2f)
+            val offsetY = ((canvasHeightPx - heightCells * effectiveCharHeight) / 2f)
 
             val nativeCanvas = drawContext.canvas.nativeCanvas
 

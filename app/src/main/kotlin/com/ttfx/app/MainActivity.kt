@@ -184,70 +184,125 @@ fun ShowcaseScreen() {
         Spacer(modifier = Modifier.height(8.dp))
 
         // Font Size & Speed Controls Row
-        Row(
+        Card(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF161928)),
+            shape = RoundedCornerShape(8.dp)
         ) {
-            // Speed options
-            Column(modifier = Modifier.weight(1.1f)) {
-                Text(
-                    text = "SPEED: $selectedSpeed",
-                    color = Color.LightGray,
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace
-                )
-                Spacer(modifier = Modifier.height(3.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp)
+            ) {
+                // Top controls line: Speed chips + Font indicator
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    speedOptions.forEach { (label, mult) ->
-                        val isSpeedSelected = label == selectedSpeed
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(4.dp))
-                                .background(if (isSpeedSelected) Color(0xFF00E5FF) else Color(0xFF1E2235))
-                                .clickable {
-                                    selectedSpeed = label
-                                    speedMultiplier = mult
-                                }
-                                .padding(vertical = 5.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = label,
-                                color = if (isSpeedSelected) Color.Black else Color.White,
-                                fontSize = 10.sp,
-                                fontWeight = if (isSpeedSelected) FontWeight.Bold else FontWeight.Normal,
-                                fontFamily = FontFamily.Monospace
-                            )
+                    // Speed selector
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "SPD",
+                            color = Color.LightGray,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                        speedOptions.forEach { (label, mult) ->
+                            val isSpeedSelected = label == selectedSpeed
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(4.dp))
+                                    .background(if (isSpeedSelected) Color(0xFF00E5FF) else Color(0xFF22273E))
+                                    .clickable {
+                                        selectedSpeed = label
+                                        speedMultiplier = mult
+                                    }
+                                    .padding(horizontal = 7.dp, vertical = 4.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = label,
+                                    color = if (isSpeedSelected) Color.Black else Color.White,
+                                    fontSize = 10.sp,
+                                    fontWeight = if (isSpeedSelected) FontWeight.Bold else FontWeight.Normal,
+                                    fontFamily = FontFamily.Monospace
+                                )
+                            }
                         }
                     }
-                }
-            }
 
-            // Font Size Slider
-            Column(modifier = Modifier.weight(0.9f)) {
-                Text(
-                    text = "FONT: ${fontSizeSp.toInt()} SP",
-                    color = Color.LightGray,
-                    fontSize = 11.sp,
-                    fontFamily = FontFamily.Monospace
-                )
+                    // Font size badge
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0xFF00FFCC).copy(alpha = 0.15f))
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = "FONT: ${fontSizeSp.toInt()} SP",
+                            color = Color(0xFF00FFCC),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Font slider with range 8sp to 120sp
                 Slider(
                     value = fontSizeSp,
                     onValueChange = { fontSizeSp = it },
-                    valueRange = 8f..24f,
-                    steps = 15,
+                    valueRange = 8f..120f,
                     colors = SliderDefaults.colors(
                         thumbColor = Color(0xFF00FFCC),
                         activeTrackColor = Color(0xFF00FFCC),
                         inactiveTrackColor = Color(0xFF2A2E43)
                     ),
-                    modifier = Modifier.height(26.dp)
+                    modifier = Modifier.fillMaxWidth().height(24.dp)
                 )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Quick preset chips for font sizes
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "PRESETS:",
+                        color = Color.Gray,
+                        fontSize = 9.sp,
+                        fontFamily = FontFamily.Monospace
+                    )
+                    listOf(10f, 14f, 20f, 32f, 48f, 72f, 120f).forEach { preset ->
+                        val isPresetActive = (fontSizeSp.toInt() == preset.toInt())
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(3.dp))
+                                .background(if (isPresetActive) Color(0xFF00FFCC) else Color(0xFF22273E))
+                                .clickable { fontSizeSp = preset }
+                                .padding(vertical = 3.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "${preset.toInt()}",
+                                color = if (isPresetActive) Color.Black else Color.LightGray,
+                                fontSize = 9.sp,
+                                fontWeight = if (isPresetActive) FontWeight.Bold else FontWeight.Normal,
+                                fontFamily = FontFamily.Monospace
+                            )
+                        }
+                    }
+                }
             }
         }
 
